@@ -1,12 +1,44 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import HeroSection from '@/components/HeroSection';
+import FitnessForm from '@/components/FitnessForm';
+import ResultsView from '@/components/ResultsView';
+import { UserProfile } from '@/lib/fitnessUtils';
+
+type AppState = 'home' | 'form' | 'results';
 
 const Index = () => {
+  const [appState, setAppState] = useState<AppState>('home');
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  const handleFormSubmit = (profile: UserProfile) => {
+    setUserProfile(profile);
+    setAppState('results');
+  };
+
+  const handleBackToHome = () => {
+    setAppState('home');
+    setUserProfile(null);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      {appState === 'home' && (
+        <HeroSection onStart={() => setAppState('form')} />
+      )}
+      
+      {appState === 'form' && (
+        <FitnessForm 
+          onSubmit={handleFormSubmit} 
+          onBack={handleBackToHome}
+        />
+      )}
+      
+      {appState === 'results' && userProfile && (
+        <ResultsView 
+          profile={userProfile} 
+          onBack={handleBackToHome}
+        />
+      )}
     </div>
   );
 };
