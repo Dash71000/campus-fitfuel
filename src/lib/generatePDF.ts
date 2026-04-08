@@ -55,10 +55,13 @@ export const generateFitnessPDF = (profile: UserProfile) => {
   doc.setFontSize(24);
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.text('FitBuddy - Your Fitness Plan', pageWidth / 2, 22, { align: 'center' });
+  doc.text(`FitBuddy - ${profile.name}'s Fitness Plan`, pageWidth / 2, 18, { align: 'center' });
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Generated on ${new Date().toLocaleDateString('en-IN')}`, pageWidth / 2, 32, { align: 'center' });
+  const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  doc.text(`Prepared for: ${profile.name}  |  Date: ${dateStr}`, pageWidth / 2, 28, { align: 'center' });
+  doc.setFontSize(9);
+  doc.text(`Analysis generated on ${new Date().toLocaleString('en-IN')}`, pageWidth / 2, 35, { align: 'center' });
   y = 50;
 
   // ===== PROFILE SUMMARY =====
@@ -74,6 +77,7 @@ export const generateFitnessPDF = (profile: UserProfile) => {
     startY: y,
     head: [['Metric', 'Value']],
     body: [
+      ['Name', profile.name],
       ['Age', `${profile.age} years`],
       ['Gender', profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)],
       ['Height / Weight', `${profile.height} cm / ${profile.weight} kg`],
