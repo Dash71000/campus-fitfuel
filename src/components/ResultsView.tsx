@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   User, Dumbbell, Utensils, Lightbulb, AlertTriangle, ChevronLeft,
-  Flame, Apple, Droplets, Moon, Target, Zap
+  Flame, Apple, Droplets, Moon, Target, Zap, Download
 } from 'lucide-react';
+import { generateFitnessPDF } from '@/lib/generatePDF';
 
 interface ResultsViewProps {
   profile: UserProfile;
