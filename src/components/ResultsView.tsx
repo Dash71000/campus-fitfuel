@@ -34,10 +34,16 @@ const ResultsView = ({ profile, onBack }: ResultsViewProps) => {
       <div className="container max-w-4xl">
         {/* Header */}
         <div className="mb-8">
-          <Button variant="ghost" size="sm" onClick={onBack} className="gap-1 mb-4">
-            <ChevronLeft className="w-4 h-4" />
-            Create New Plan
-          </Button>
+          <div className="flex items-center justify-between mb-4">
+            <Button variant="ghost" size="sm" onClick={onBack} className="gap-1">
+              <ChevronLeft className="w-4 h-4" />
+              Create New Plan
+            </Button>
+            <Button size="sm" onClick={() => generateFitnessPDF(profile)} className="gap-2">
+              <Download className="w-4 h-4" />
+              Download PDF
+            </Button>
+          </div>
           <h1 className="text-3xl sm:text-4xl font-bold">
             Your Personalized <span className="text-gradient">Fitness Plan</span>
           </h1>
