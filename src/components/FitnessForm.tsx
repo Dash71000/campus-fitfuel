@@ -18,6 +18,7 @@ const FitnessForm = ({ onSubmit, onBack }: FitnessFormProps) => {
   const totalSteps = 5;
 
   const [formData, setFormData] = useState({
+    name: '',
     age: '',
     gender: 'male' as 'male' | 'female' | 'other',
     height: '',
@@ -37,6 +38,7 @@ const FitnessForm = ({ onSubmit, onBack }: FitnessFormProps) => {
 
   const handleSubmit = () => {
     const profile: UserProfile = {
+      name: formData.name || 'Student',
       age: parseInt(formData.age) || 20,
       gender: formData.gender,
       height: parseFloat(formData.height) || 170,
@@ -55,7 +57,7 @@ const FitnessForm = ({ onSubmit, onBack }: FitnessFormProps) => {
   const canProceed = () => {
     switch (step) {
       case 1:
-        return formData.age && formData.height && formData.weight;
+        return formData.name && formData.age && formData.height && formData.weight;
       case 2:
         return true;
       case 3:
@@ -123,6 +125,17 @@ const FitnessForm = ({ onSubmit, onBack }: FitnessFormProps) => {
             {/* Step 1: Basic Info */}
             {step === 1 && (
               <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="e.g., Rahul Sharma"
+                    value={formData.name}
+                    onChange={(e) => updateField('name', e.target.value)}
+                    className="h-12"
+                  />
+                </div>
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="age">Age (years)</Label>

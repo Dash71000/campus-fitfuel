@@ -45,9 +45,11 @@ const ResultsView = ({ profile, onBack }: ResultsViewProps) => {
             </Button>
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold">
-            Your Personalized <span className="text-gradient">Fitness Plan</span>
+            {profile.name}'s <span className="text-gradient">Fitness Plan</span>
           </h1>
-          <p className="text-muted-foreground mt-2">Based on your inputs, here's your complete guide</p>
+          <p className="text-muted-foreground mt-2">
+            Generated on {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
         </div>
 
         {/* User Profile Summary */}
