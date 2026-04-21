@@ -175,19 +175,57 @@ const jainMeals = (budget: number, cooking: string): DayMeals => ({
   },
 });
 
+// Adapt portions and items based on fitness goal
+const adaptMealsToGoal = (meals: DayMeals, profile: UserProfile): DayMeals => {
+  const { fitnessGoal } = profile;
+  const adapted: DayMeals = JSON.parse(JSON.stringify(meals));
+
+  if (fitnessGoal === 'muscle-gain') {
+    // Bigger portions + extra protein/carbs
+    adapted.breakfast.items.push('+ 1 Extra Roti / Slice of Bread', '+ Glass of Milk with Peanut Butter');
+    adapted.lunch.items.push('+ Extra katori of rice', '+ Boiled egg / paneer cube (50g)');
+    adapted.dinner.items.push('+ Extra protein serving (eggs/paneer/dal)');
+    adapted.evening.items.push('+ Peanut Butter Toast (2 slices)');
+    // Bump calorie ranges up
+    (Object.keys(adapted) as Array<keyof DayMeals>).forEach((k) => {
+      adapted[k].calories = adapted[k].calories.replace(/(\d+)-(\d+)/, (_, a, b) => `${+a + 100}-${+b + 150}`);
+    });
+  } else if (fitnessGoal === 'fat-loss') {
+    // Smaller carbs, more fiber/protein focus
+    adapted.breakfast.items.push('(Reduce bread/roti by half — focus on protein)');
+    adapted.lunch.items.push('(Half rice portion, double the salad & dal)');
+    adapted.dinner.items.push('(Skip rice — only roti + sabzi + protein)');
+    adapted.evening.items = adapted.evening.items.filter((i) => !/peanut butter|toast/i.test(i));
+    adapted.evening.items.push('Green Tea (no sugar)');
+    (Object.keys(adapted) as Array<keyof DayMeals>).forEach((k) => {
+      adapted[k].calories = adapted[k].calories.replace(/(\d+)-(\d+)/, (_, a, b) => `${Math.max(100, +a - 100)}-${Math.max(150, +b - 100)}`);
+    });
+  } else {
+    // Maintenance: balanced reminder
+    adapted.lunch.items.push('(Maintain balanced portions — listen to hunger)');
+  }
+
+  return adapted;
+};
+
 export const getDietPlan = (profile: UserProfile): DayMeals => {
   const { dietPreference, budget, cookingAccess } = profile;
 
+  let base: DayMeals;
   switch (dietPreference) {
     case 'non-vegetarian':
-      return nonVegetarianMeals(budget, cookingAccess);
+      base = nonVegetarianMeals(budget, cookingAccess);
+      break;
     case 'vegan':
-      return veganMeals(budget, cookingAccess);
+      base = veganMeals(budget, cookingAccess);
+      break;
     case 'jain':
-      return jainMeals(budget, cookingAccess);
+      base = jainMeals(budget, cookingAccess);
+      break;
     default:
-      return vegetarianMeals(budget, cookingAccess);
+      base = vegetarianMeals(budget, cookingAccess);
   }
+  return adaptMealsToGoal(base, profile);
 };
 
 export const getBudgetTips = (budget: number): string[] => {
