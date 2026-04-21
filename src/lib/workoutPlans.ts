@@ -215,13 +215,86 @@ const gymExercises: DayPlan[] = [
   },
 ];
 
+// Adjust a base plan based on user's fitness goal and activity level
+const adaptPlanToGoal = (plan: DayPlan[], profile: UserProfile): DayPlan[] => {
+  const { fitnessGoal, activityLevel, gender } = profile;
+
+  return plan.map((day) => {
+    const isRestDay = /rest/i.test(day.focus);
+    const isCardioDay = /cardio|hiit/i.test(day.focus);
+
+    let exercises = day.exercises.map((ex) => {
+      // Skip modifying timed/duration exercises like "20-30 min" or "30 sec"
+      const isTimed = /sec|min/i.test(ex.reps);
+
+      let sets = ex.sets;
+      let reps = ex.reps;
+      let rest = ex.rest;
+
+      if (!isRestDay && !isTimed) {
+        if (fitnessGoal === 'muscle-gain') {
+          // Heavier, lower reps, longer rest
+          sets = Math.min(sets + 1, 5);
+          reps = reps.replace(/(\d+)-(\d+)/, (_, a, b) => `${Math.max(6, +a - 2)}-${Math.max(8, +b - 3)}`);
+          rest = rest === '-' ? rest : '90s';
+        } else if (fitnessGoal === 'fat-loss') {
+          // Higher reps, shorter rest for metabolic effect
+          reps = reps.replace(/(\d+)-(\d+)/, (_, a, b) => `${+a + 3}-${+b + 5}`);
+          rest = rest === '-' ? rest : '30-45s';
+        }
+      }
+
+      // Low activity beginners: reduce one set on non-rest days
+      if (!isRestDay && activityLevel === 'low' && sets > 2) {
+        sets = sets - 1;
+      }
+      // High activity: add intensity
+      if (!isRestDay && activityLevel === 'high' && !isTimed) {
+        sets = Math.min(sets + 1, 5);
+      }
+
+      return { ...ex, sets, reps, rest };
+    });
+
+    // Fat-loss: append a finisher cardio block on non-rest, non-cardio days
+    if (fitnessGoal === 'fat-loss' && !isRestDay && !isCardioDay) {
+      exercises = [
+        ...exercises,
+        { name: 'Finisher: Jump Rope / High Knees', sets: 3, reps: '45 sec', rest: '15s' },
+      ];
+    }
+
+    // Muscle-gain: add a focused accessory burnout
+    if (fitnessGoal === 'muscle-gain' && !isRestDay && !isCardioDay) {
+      exercises = [
+        ...exercises,
+        { name: 'Burnout Set (last exercise, light weight)', sets: 1, reps: 'AMRAP', rest: '-' },
+      ];
+    }
+
+    // Female-specific: add an extra glute/core accessory on lower body days
+    if (gender === 'female' && /leg|lower/i.test(day.focus)) {
+      exercises = [
+        ...exercises,
+        { name: 'Hip Thrusts', sets: 3, reps: '12-15', rest: '60s' },
+      ];
+    }
+
+    return { ...day, exercises };
+  });
+};
+
 export const getWorkoutPlan = (profile: UserProfile): DayPlan[] => {
+  let basePlan: DayPlan[];
   switch (profile.equipment) {
     case 'gym':
-      return gymExercises;
+      basePlan = gymExercises;
+      break;
     case 'home':
-      return homeEquipmentExercises;
+      basePlan = homeEquipmentExercises;
+      break;
     default:
-      return noEquipmentExercises;
+      basePlan = noEquipmentExercises;
   }
+  return adaptPlanToGoal(basePlan, profile);
 };
